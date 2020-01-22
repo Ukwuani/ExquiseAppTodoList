@@ -1,3 +1,60 @@
-<html>
-Hellojjj
+<!DOCTYPE html>
+    <head>
+        <title> Exquis Todo App </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.1/axios.min.js"></script>
+    <body>
+        <section id="app" class="container">
+            <header class="navbar">
+                <section class="navbar-section">
+                    <a href="..." class="navbar-brand mr-2">Exquis TodoList App</a>
+                    <button href="..." class="btn btn-success m-2">Create</button>
+                    
+                </section>
+            </header>
+
+            <section> 
+                <div v-for="el in todolist" :key="el.title" class="tile tile-centered m-1">
+                    <div class="tile-icon bg-primary">
+                        <figure class="icoavatar avatar-xl ">
+                            <i class="icon icon-time centered"></i>
+                        </figure>
+                     </div>
+                    <div class="tile-content"> 
+                        <div class="tile-title">{{el.title}}</div>
+                        <small class="tile-subtitle text-gray">spectre-docs.pdf</small>
+                    </div>
+                    <div class="tile-action">
+                    <button class="btn btn-action s-circle  btn-error"><i class="icon icon-delete"></i></button>
+                    <button class="btn btn-action s-circle  btn-error"><i class="icon icon-edit"></i></button>
+                     </div> 
+                </div>
+                
+            </section>
+        </section>
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    message: 'Hello Vue!',
+                    todolist: ''
+                },
+                methods: {
+                    createItem () {},
+                    deleteItem () {},
+                    updateItem() {}
+                },
+                mounted() {
+                    axios .get('http://localhost:3000/api/todolist')
+                    .then(response => (this.todolist = response))
+                },
+                })
+        </script>
+    </body>
 </html>
