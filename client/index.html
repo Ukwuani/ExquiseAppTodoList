@@ -15,13 +15,13 @@
             <header class="navbar">
                 <section class="navbar-section">
                     <a href="..." class="navbar-brand mr-2">Exquis TodoList App</a>
-                    <button @click="modalshow=!modalshow"  class="btn btn-success m-2">Create</button>
+                    <button @click="createItemAction"  class="btn btn-success m-2">Create</button>
                     
                 </section>
             </header>
 
             <section> 
-                <div v-for="(el, index) in todolist" :key="el.title" class="tile tile-centered m-1">
+                <div v-for="(el, index) in todolist" :key="el.createdAt" class="tile tile-centered m-1">
                     <div class="tile-icon bg-primary">
                         <figure class="icoavatar avatar-xl ">
                             <i class="icon icon-time centered"></i>
@@ -33,29 +33,42 @@
                     </div>
                     <div class="tile-action">
                     <button @click="deleteItem(el._id, index)" class="btn btn-action s-circle  btn-error"><i class="icon icon-delete"></i></button>
-                    <button class="btn btn-action s-circle  btn-error"><i class="icon icon-edit"></i></button>
+                    <button @click="editItemAction(el.id, index)" class="btn btn-action s-circle  btn-error"><i class="icon icon-edit"></i></button>
                      </div> 
                 </div>
             </section>
 
             <!-- Modal -->
             <div v-show="modalshow" class="modal active animated zoomIn faster" id="modal-id">
-                <a @click="modalshow=!modalshow" href="" class="modal-overlay" aria-label="Close"></a>
+                <a @click="modalshow=!modalshow" class="modal-overlay" aria-label="Close"></a>
                 <div class="modal-container">
                     <div class="modal-header">
-                    <a @click="modalshow=!modalshow"  href="" class="btn btn-clear float-right" aria-label="Close"></a>
+                    <div v-show="toastshow" class="toast bg-success">
+                            {{toastmsg}}
+                        </div>
+                    <a @click="modalshow=!modalshow" class="btn btn-clear float-right" aria-label="Close"></a>
                     <div class="modal-title h5">Add Todo</div>
                     </div>
                     <div class="modal-body">
                     <div class="content">
                        <div class="form-group">
                             <label class="form-label" for="input-example-1">Title</label>
-                            <input class="form-input" type="text" id="input-example-1" placeholder="Name">
+                            <input class="form-input" type="text" placeholder="eg. Buy the Shirt" v-model="model.title">
                         </div>
+
+                       <div class="form-group">
+                            <label class="form-label" for="input-example-1">Label</label>
+                            <select  v-model="model.label" class="form-input" type="text"  >
+                                <option value="Work" selected> Work</option>
+                                <option value= "Study"> Study </option>
+                            </select>
+                        </div>
+
                     </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-primary"> Create Item </button>
+                        <button v-show="creating" @click="createItem" class="btn btn-primary"> Create Item </button>
+                        <button v-show="updating"  @click="updateItem" class="btn btn-primary"> Edit Item </button>
                     </div>
                 </div>
                 </div>
@@ -65,22 +78,79 @@
             var app = new Vue({
                 el: '#app',
                 data: {
+                    link: 'https://exquistodoapp.herokuapp.com/api/todolist',
                     message: 'Hello Vue!',
                     todolist: '',
-                    modalshow: false
+                    modalshow: false,
+                    model: {
+                        title: '',
+                        label: 'Work'
+                    },
+                    toastshow: false,
+                    toastmsg: '',
+                    creating: false,
+                    updating: false,
+                    updex: 0,
+                    upid: '',
                 },
                 methods: {
-                    createItem () {},
+                    createItemAction () {
+                        this.modalshow=!this.modalshow
+                        this.creating = true
+                        this.updating = false
+                    },
+
+                    editItemAction(id, index) {
+                        this.modalshow=!this.modalshow
+                        this.creating = false
+                        this.updating = true
+                        this.model.title = this.todolist[index].title
+                        this.model.label = this.todolist[index].label
+                        this.upid = id
+                        this.updex = index
+                    },
+
+                    createItem () {
+                        axios.post(`${this.link}`, this.model)
+                        .then(response => {
+                            if (response.data.status == 200) {
+                                this.toastmsg="Item Added"
+                                this.toastshow= !this.toastshow
+
+                                setTimeout(() => {
+                                    this.toastshow = !this.toastshow
+                                    this.modalshow = !this.modalshow
+                                }, 1000);
+                            }
+                            this.todolist.push(response.data.msg)
+                        })
+                    },
+
                     deleteItem (id, index) {
-                        axios.delete(`http://localhost:3000/api/todolist?id=${id}`)
+                        axios.delete(`${this.link}?id=${id}`)
                         .then(response => {
                             this.todolist.splice(index, 1)
                         })
                     },
-                    updateItem() {}
+
+                    updateItem(id, index) {
+                         axios.put(`${this.link}`, {id: id, data: this.model})
+                        .then(response => {
+                            if (response.data.status == 200) {
+                                this.toastmsg="Item Edited"
+                                this.toastshow= !this.toastshow
+
+                                setTimeout(() => {
+                                    this.toastshow = !this.toastshow
+                                    this.modalshow = !this.modalshow
+                                }, 1000);
+                            }
+                            this.todolist[this.updex] = response.data.msg
+                        })
+                    }
                 },
                 mounted() {
-                    axios.get('http://localhost:3000/api/todolist')
+                    axios.get(`${this.link}`)
                     .then(response => (this.todolist = response.data))
                 },
                 })

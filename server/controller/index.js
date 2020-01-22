@@ -54,7 +54,7 @@ module.exports = {
             res.json({
                 status: 200,
                 success: true,
-                msg: 'Item updated'
+                msg: req.body.data
             })
         })
     },
