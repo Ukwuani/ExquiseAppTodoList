@@ -8,77 +8,73 @@ db.loadDatabase()
 module.exports = {
     /**
      */
-    async createTodoList(req, res) {
+     async createTodoList(req, res) {
         const _model = new model(req.body)
-        const response = await db.insert(_model, (err, newDoc) => {
+        await db.insert(_model, (err, newDoc) => {
             if (err) {
-                return {
+                res.json({
                     status: 401,
                     success: false,
                     msg: err
-                }
+                })
             }
-            return {
+            res.json({
                 status: 200,
                 success: true,
-                msg: 'Todo Item Created'
-            }
+                msg: newDoc
+            })
          })
-        res.json(response)
     },
 
     /**
      */
     async getTodoList(req, res) {
-        const response = await db.find(req.query, (err, docs) => {
+        await db.find(req.query, (err, docs) => {
              if (err) {
-                return {
+                res.json({
                     status: 401,
                     success: false,
                     msg: err
-                }
+                })
             }
-            return docs
+            res.json(docs)
          })
-        res.send(response)
     },
 
     /**
      */
     async updateTodoList(req, res) {
-        const response = await db.update({ _id: req.body.id }, { $set:  req.body.data  }, {}, (err, num) => {
-            if (err) return {
+        await db.update({ _id: req.body.id }, { $set:  req.body.data  }, {}, (err, num) => {
+            if (err) res.json({
                 status: 401,
                 success: false,
                 msg: err
-            }
+            })
 
-            return {
+            res.json({
                 status: 200,
                 success: true,
                 msg: 'Item updated'
-            }
+            })
         })
-        res.send(response)
     },
 
     /**
      */
     async deleteTodoListItem(req, res) {
-        const response = await db.remove({ _id: req.query.id }, {}, function (err, numRemoved) {
+        await db.remove({ _id: req.query.id }, {}, function (err, numRemoved) {
             if (err) {
-                return {
+                res.json({
                     status: 401,
                     success: false,
                     msg: err
-                }
+                })
             }
-            return {
+            res.json({
                 status: 200,
                 success: true,
                 msg: "Item deleted"
-            }
+            })
         });
-        res.send(response)
     }
 }
